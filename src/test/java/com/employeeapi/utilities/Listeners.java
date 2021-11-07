@@ -20,7 +20,6 @@ public class Listeners extends TestListenerAdapter
 	public void onStart(ITestContext testContext)
 	{
 		htmlReporter=new ExtentHtmlReporter(System.getProperty("user.dir")+ "/Reports/myReport.html");//specify location of the report
-				
 		htmlReporter.config().setDocumentTitle("Automation Report"); 
 		htmlReporter.config().setReportName("Rest API Testing Report"); 
 		//htmlReporter.config().setTestViewChartLocation(ChartLocation.TOP); //location of the chart

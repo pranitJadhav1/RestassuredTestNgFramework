@@ -1,11 +1,11 @@
 /******************************************************
-Test Name:Create new record in database 
-URI: http://dummy.restapiexample.com/api/v1/create
-Request Type: POST
-Request Payload(Body): {"name":"XXXXX","salary":"XXXX","age":"XX"}
+Test Name: Delete an employee record
+URI: http://dummy.restapiexample.com/api/v1/delete/{id}
+Request Type: DELETE
+Request Payload(Body): NA
 
 ********* Validations **********
-Response Payload(Body) : {"name":"XXXXX","salary":"XXXX","age":"XX"}
+Response Payload(Body) : {"success":{"text":"successfully! deleted Records"}}
 Status Code : 200
 Status Line : HTTP/1.1 200 OK
 Content Type : text/html; charset=UTF-8
@@ -15,58 +15,49 @@ Content Encoding : gzip
 
 package com.employeeapi.testCases;
 
-import org.json.simple.JSONObject;
 import org.testng.Assert;
 import org.testng.annotations.*;
+
 import com.employeeapi.base.TestBase;
-import com.employeeapi.utilities.RestUtils;
+
 import io.restassured.RestAssured;
 import io.restassured.http.Method;
+import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 
-public class TC003_Post_Employee_Record extends TestBase{
+
+public class TC005_Delete_Employee_Record extends TestBase{
 
 	RequestSpecification httpRequest;
 	Response response;
-	
-	String empName=RestUtils.empName();
-	String empSalary=RestUtils.empSal();
-	String empAge=RestUtils.empAge();
-	
-	
+		
 	@BeforeClass
-	void createEmployee() throws InterruptedException
+	void deleteEmployee() throws InterruptedException
 	{
-		logger.info("*********Started TC003_Post_Employee_Record **********");
+		logger.info("*********Started TC005_Delete_Employee_Record **********");
 		
 		RestAssured.baseURI = "http://dummy.restapiexample.com/api/v1";
 		httpRequest = RestAssured.given();
-
-		JSONObject requestParams = new JSONObject();
-		requestParams.put("name", empName); // Cast
-		requestParams.put("salary", empSalary);
-		requestParams.put("age", empAge);
 		
-		// Add a header stating the Request body is a JSON
-		httpRequest.header("Content-Type", "application/json");
-
-		// Add the Json to the body of the request
-		httpRequest.body(requestParams.toJSONString());
-
-		response = httpRequest.request(Method.POST, "/create");
+		response = httpRequest.request(Method.GET, "/employees");
+				
+		// First get the JsonPath object instance from the Response interface
+		JsonPath jsonPathEvaluator = response.jsonPath();
+			 
+		//Capture id
+		String empID=jsonPathEvaluator.get("[0].id");
+		response = httpRequest.request(Method.DELETE, "/delete/"+empID); //Pass ID to delete record
 		
-		Thread.sleep(5000);
-
+		Thread.sleep(3000);
 	}
 	
 	@Test
 	void checkResposeBody()
 	{
 		String responseBody = response.getBody().asString();
-		Assert.assertEquals(responseBody.contains(empName), true);
-		Assert.assertEquals(responseBody.contains(empSalary), true);
-		Assert.assertEquals(responseBody.contains(empAge), true);
+		Assert.assertEquals(responseBody.contains("successfully! deleted Records"), true);
+
 	}
 		
 	@Test
@@ -79,7 +70,7 @@ public class TC003_Post_Employee_Record extends TestBase{
 	@Test
 	void checkstatusLine()
 	{
-		String statusLine = response.getStatusLine(); 
+		String statusLine = response.getStatusLine(); // Gettng status Line
 		Assert.assertEquals(statusLine, "HTTP/1.1 200 OK");
 		
 	}
@@ -105,11 +96,10 @@ public class TC003_Post_Employee_Record extends TestBase{
 		Assert.assertEquals(contentEncoding, "gzip");
 
 	}
-	
+
 	@AfterClass
 	void tearDown()
 	{
-		logger.info("*********  Finished TC003_Post_Employee_Record **********");
+		logger.info("*********  Finished TC005_Delete_Employee_Record **********");
 	}
-
 }
